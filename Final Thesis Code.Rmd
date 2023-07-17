@@ -1,0 +1,251 @@
+---
+title: "Thesis Data Analysis"
+author: "Alex Holbrook"
+date: '2023-03-16'
+output: word_document
+---
+
+##LOADING IN THE DATA SET
+load("/Users/alex/Desktop/ICPSR_31721 4/DS0001/31721-0001-Data.rda")
+
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(magrittr)
+
+##RECODING VARIABLES
+sex <- da31721.0001$Q5
+gender <- da31721.0001$Q6 
+sexorient  <- da31721.0001$Q8
+
+
+##Creating race
+RESPKEY <- da31721.0001$RESPKEY
+black <- da31721.0001$D9_1 
+white <- da31721.0001$D9_2
+latine <- da31721.0001$D9_3
+native <- da31721.0001$D9_4
+
+race.a <- data.frame(black, white, latine, native)
+
+race.a$racecat <- ifelse(black == "(1) Selected", "black", 
+ifelse(white == "(1) Selected", "white",
+ifelse(latine == "(1) Selected", "latine",
+ifelse(native == "(1) Selected", "native", "other"
+))))
+
+race.a$racecat <- factor(race.a$racecat, levels = c(0,1,2,3,4), labels = c("white", "black", "latine", "native", "other")
+                  
+
+race<- race.a$racecat
+
+##End of Race
+    
+agecat <- da31721.0001$Q12
+education <- da31721.0001$Q24
+employmentstat <- da31721.0001$Q25
+SES <- da31721.0001$Q26
+healthinsurance <- da31721.0001$Q34
+comfort <- da31721.0001$Q40
+knowledge  <- da31721.0001$Q41
+educate <- da31721.0001$Q42
+discrimination <- da31721.0001$Q45
+bathroom <- da31721.0001$Q46
+
+
+
+##CREATING FINAL DATA FRAME
+fdata <- data.frame(sex, gender, sexorient, race, agecat, education, employmentstat, SES, healthinsurance, comfort, knowledge, educate, discrimination, bathroom)
+
+fdata <- fdata %>% drop_na()
+
+##UNIVARIABLE ANALYSIS
+summary(fdata)
+
+install.packages('epiDisplay')
+library(epiDisplay)
+
+##if you get plot size margin error, increase the size of the plot panel
+
+tab1(fdata$sex, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$gender, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$sexorient, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$race, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$agecat, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$education, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$employmentstat, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$SES, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$healthinsurance, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$comfort, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$knowledge, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$educate, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$discrimination, sort.group = "decreasing", cum.percent = TRUE)
+tab1(fdata$bathroom, sort.group = "decreasing", cum.percent = TRUE)
+
+##BIVARIATE ANALYSIS
+
+##Varying with the outcome variable - comfort
+##apply - simulate.p.value =TRUE - if you get an error about small sample size with the final data set with inclusion and exclusion criteria
+
+CrossTable(fdata$sex, fdata$comfort)
+chisq.test(fdata$comfort, fdata$sex, correct=FALSE, simulate.p.value =TRUE)
+
+CrossTable(fdata$gender, fdata$comfort)
+chisq.test(fdata$comfort, fdata$gender, correct=FALSE)
+
+CrossTable(fdata$sexorient, fdata$comfort)
+chisq.test(fdata$comfort, fdata$sexorient, correct=FALSE)
+
+CrossTable(fdata$race, fdata$comfort)
+chisq.test(fdata$comfort, fdata$race, correct=FALSE)
+
+CrossTable(fdata$agecat, fdata$comfort)
+chisq.test(fdata$comfort, fdata$agecat, correct=FALSE)
+
+CrossTable(fdata$education, fdata$comfort)
+chisq.test(fdata$comfort, fdata$education, correct=FALSE)
+
+CrossTable(fdata$employmentstat, fdata$comfort)
+chisq.test(fdata$comfort, fdata$employmentstat, correct=FALSE)
+
+CrossTable(fdata$SES, fdata$comfort)
+chisq.test(fdata$comfort, fdata$SES, correct=FALSE)
+
+CrossTable(fdata$healthinsurance, fdata$comfort)
+chisq.test(fdata$comfort, fdata$healthinsurance, correct=FALSE)
+
+CrossTable(fdata$comfort, fdata$comfort)
+chisq.test(fdata$comfort, fdata$comfort, correct=FALSE)
+
+CrossTable(fdata$knowledge, fdata$comfort)
+chisq.test(fdata$comfort, fdata$knowledge, correct=FALSE)
+
+
+##exposure variable - knowledge
+CrossTable(fdata$sex, fdata$knowledge)
+chisq.test(fdata$knowledge, fdata$sex, correct=FALSE, simulate.p.value =TRUE)
+
+CrossTable(fdata$gender, fdata$knowledge)
+chisq.test(fdata$knowledge, fdata$gender, correct=FALSE)
+
+CrossTable(fdata$sexorient, fdata$knowledge)
+chisq.test(fdata$knowledge, fdata$sexorient, correct=FALSE)
+
+CrossTable(fdata$race, fdata$knowledge)
+chisq.test(fdata$knowledge, fdata$race, correct=FALSE)
+
+CrossTable(fdata$agecat, fdata$knowledge)
+chisq.test(fdata$knowledge, fdata$agecat, correct=FALSE)
+
+CrossTable(fdata$education, fdata$knowledge)
+chisq.test(fdata$knowledge, fdata$education, correct=FALSE)
+
+CrossTable(fdata$employmentstat, fdata$knowledge)
+chisq.test(fdata$knowledge, fdata$employmentstat, correct=FALSE)
+
+CrossTable(fdata$SES, fdata$knowledge)
+chisq.test(fdata$knowledge, fdata$SES, correct=FALSE)
+
+CrossTable(fdata$healthinsurance, fdata$knowledge)
+chisq.test(fdata$knowledge, fdata$healthinsurance, correct=FALSE)
+
+CrossTable(fdata$comfort, fdata$knowledge)
+chisq.test(fdata$knowledge, fdata$comfort, correct=FALSE)
+
+##Cochran-Armitage
+#dichotomize comfort
+if (comfort == "(1) Very uncomfortable") {comfort.b <- "0"}
+
+fdata$comfort.b <- ifelse(fdata$comfort == "(1) Very uncomfortable", 0, 
+ifelse(fdata$comfort == "(2) Uncomfortable", 0, 
+ifelse(fdata$comfort == "(3) Comfortable", 1,
+ifelse(fdata$comfort == "(4) Very comfortable", 1, "NA"
+))))
+
+comfort.bf <- factor(fdata$comfort.b)
+summary(comfort.bf)
+
+library(DESC)
+
+test <- data.frame(comfort.bf, fdata$education)
+P <- as.data.frame.matrix(table(test))
+CochranArmitageTest(P)
+
+test <- data.frame(comfort.bf, fdata$agecat)
+P <- as.data.frame.matrix(table(test))
+CochranArmitageTest(P)
+
+##Logistic Regression
+#ordered logistic regression (becuase comfort is ordinal)
+test <- polr(comfort ~ knowledge, data=fdata)
+summary(test)
+
+test <- vglm (comfort ~ knowledge, family=cumulative(parallel=TRUE), data=fdata)
+summary(test)
+
+##getting p-values and CI for each of the variables
+(ctable <- coef(summary(test)))
+p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
+(ctable <- cbind(ctable, "p value" = p))
+(ci <- confint(test))
+
+##Model with all the covariates
+test.1 <- polr(factor(comfort) ~ factor(knowledge) + gender + sex + sexorient + race + agecat + education + employmentstat + SES + healthinsurance, data=fdata)
+summary (test.1)
+
+##getting p-values and CI for each of the variables
+(ctable <- coef(summary(test.1)))
+p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
+(ctable <- cbind(ctable, "p value" = p))
+(ci <- confint(test.1))
+
+##Model with income/employment/race/age
+test.2 <- polr(factor(comfort) ~ factor(knowledge) + SES + employmentstat + race + agecat, data=fdata)
+summary (test.2)
+
+##getting p-values and CI for each of the variables
+(ctable <- coef(summary(test.2)))
+p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
+(ctable <- cbind(ctable, "p value" = p))
+(ci <- confint(test.2))
+
+##Model with race
+test.3 <- polr(factor(comfort) ~ factor(knowledge) + race, data=fdata)
+summary (test.3)
+
+##Model with age
+test.4 <- polr(factor(comfort) ~ factor(knowledge) + agecat, data=fdata)
+summary (test.4)
+
+##Model wtih age + race 
+test.5 <- polr(factor(comfort) ~ factor(knowledge) + race + agecat, data=fdata)
+summary (test.5)
+
+##Model with age + race + income -- "ADJUSTED MODEL"
+test.6 <- polr(factor(comfort) ~ factor(knowledge) + race + agecat + SES, data=fdata)
+summary (test.6)
+
+##getting p-values and CI for each of the variables
+(ctable <- coef(summary(test.6)))
+p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
+(ctable <- cbind(ctable, "p value" = p))
+(ci <- confint(test.6))
+
+
+
+
+
+
+
+##null model
+test.n <- polr(factor(comfort) ~ 1)
+summary(test.n)
+
+##getting p-values and CI for each of the variables
+(ctable <- coef(summary(test.n)))
+p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
+(ctable <- cbind(ctable, "p value" = p))
+(ci <- confint(test.n))
+
+
+
